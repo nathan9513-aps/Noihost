@@ -1,0 +1,340 @@
+// VERSIONE POSTGRESQL - Con enum nativi per Railway/produzione
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== ENUMS ====================
+
+enum UserRole {
+  HOST
+  CLEANER
+  ADMIN
+}
+
+enum CleaningJobStatus {
+  SCHEDULED
+  IN_PROGRESS
+  PENDING_APPROVAL
+  COMPLETED
+  CANCELLED
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentType {
+  CLEANING_FEE
+  PLATFORM_FEE
+  TIP
+  BONUS
+  REFUND
+}
+
+enum NotificationType {
+  JOB_ASSIGNED
+  JOB_COMPLETED
+  PAYMENT_RECEIVED
+  MESSAGE
+  BOOKING_CREATED
+  BID_PLACED
+  REVIEW_LEFT
+}
+
+enum CalendarSyncStatus {
+  ACTIVE
+  FAILED
+  PAUSED
+}
+
+enum CalendarProvider {
+  AIRBNB
+  VRBO
+  ICAL
+  GOOGLE
+}
+
+// ==================== MODELS ====================
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  phone     String?
+  role      UserRole
+  avatar    String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Stripe Connect
+  stripeAccountId     String?
+  stripeCustomerId    String?
+  stripeOnboardingComplete Boolean @default(false)
+
+  // Relations
+  cleanerProfile  CleanerProfile?
+  properties      Property[]
+  bookings        Booking[]
+  cleaningJobs    CleaningJob[] @relation("AssignedCleaner")
+  bids            Bid[]
+  reviews         Review[]       @relation("ReviewsWritten")
+  receivedReviews Review[]       @relation("ReviewsReceived")
+  sentMessages    Message[]      @relation("SentMessages")
+  receivedMessages Message[]     @relation("ReceivedMessages")
+  notifications   Notification[]
+  payments        Payment[]      @relation("PaymentSender")
+  receivedPayments Payment[]     @relation("PaymentReceiver")
+
+  @@map("users")
+}
+
+model CleanerProfile {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  bio              String?
+  hourlyRate       Float
+  yearsExperience  Int
+  servicesOffered  String[] // Array di servizi (es: ["Deep Clean", "Laundry", "Window Cleaning"])
+  availability     Json     // Calendario disponibilità (es: {monday: [9-17], tuesday: [9-17]})
+  serviceRadius    Float    // Raggio di servizio in km
+  address          String?
+  city             String
+  zipCode          String
+  latitude         Float?
+  longitude        Float?
+  rating           Float    @default(0)
+  totalJobs        Int      @default(0)
+  verifiedIdentity Boolean  @default(false)
+  isAvailable      Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("cleaner_profiles")
+}
+
+model Property {
+  id           String   @id @default(cuid())
+  hostId       String
+  name         String
+  address      String
+  city         String
+  state        String
+  zipCode      String
+  country      String
+  latitude     Float?
+  longitude    Float?
+  bedrooms     Int
+  bathrooms    Float
+  squareFeet   Int?
+  propertyType String   // Apartment, House, Condo, etc.
+  accessInfo   String?  // Istruzioni per accesso (codice porta, chiavi, etc.)
+  specialInstructions String? @db.Text
+  photos       String[] // Array di URL foto
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  host          User            @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  bookings      Booking[]
+  cleaningJobs  CleaningJob[]
+  inventoryItems InventoryItem[]
+  calendarSyncs CalendarSync[]
+
+  @@map("properties")
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  propertyId      String
+  hostId          String
+  guestName       String
+  guestEmail      String?
+  guestPhone      String?
+  checkInDate     DateTime
+  checkOutDate    DateTime
+  numberOfGuests  Int
+  status          BookingStatus @default(PENDING)
+  notes           String?       @db.Text
+  externalId      String?       // ID da Airbnb/Vrbo
+  source          String?       // airbnb, vrbo, manual, etc.
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  property     Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  host         User          @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  cleaningJobs CleaningJob[]
+
+  @@map("bookings")
+}
+
+model CleaningJob {
+  id                String            @id @default(cuid())
+  propertyId        String
+  bookingId         String?
+  assignedCleanerId String?
+  scheduledDate     DateTime
+  scheduledTime     String            // Es: "10:00"
+  duration          Int               // Minuti stimati
+  status            CleaningJobStatus @default(SCHEDULED)
+  instructions      String?           @db.Text
+  checklistTemplate Json?             // Template checklist personalizzato
+  completedChecklist Json?            // Checklist compilata dal cleaner
+  photos            String[]          // Foto post-pulizia
+  issuesReported    String?           @db.Text
+  startTime         DateTime?
+  endTime           DateTime?
+  price             Float?
+  cleanerPayout     Float?            // Quanto riceve il cleaner
+  platformFee       Float?            // Fee della piattaforma
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  property       Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  booking        Booking?  @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  assignedCleaner User?    @relation("AssignedCleaner", fields: [assignedCleanerId], references: [id], onDelete: SetNull)
+  bids           Bid[]
+  payments       Payment[]
+
+  @@map("cleaning_jobs")
+}
+
+model Bid {
+  id             String   @id @default(cuid())
+  cleaningJobId  String
+  cleanerId      String
+  amount         Float
+  message        String?  @db.Text
+  isAccepted     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  cleaningJob CleaningJob @relation(fields: [cleaningJobId], references: [id], onDelete: Cascade)
+  cleaner     User        @relation(fields: [cleanerId], references: [id], onDelete: Cascade)
+
+  @@map("bids")
+}
+
+model Payment {
+  id                  String        @id @default(cuid())
+  senderId            String        // Host che paga
+  receiverId          String        // Cleaner che riceve
+  cleaningJobId       String?
+  amount              Float
+  platformFee         Float
+  stripePaymentIntent String?
+  stripeTransferId    String?
+  type                PaymentType
+  status              PaymentStatus @default(PENDING)
+  processedAt         DateTime?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  sender      User         @relation("PaymentSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver    User         @relation("PaymentReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  cleaningJob CleaningJob? @relation(fields: [cleaningJobId], references: [id], onDelete: SetNull)
+
+  @@map("payments")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  reviewerId String
+  reviewedId String
+  rating    Int      // 1-5
+  comment   String?  @db.Text
+  jobId     String?  // Riferimento al job specifico
+  isVisible Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reviewer User @relation("ReviewsWritten", fields: [reviewerId], references: [id], onDelete: Cascade)
+  reviewed User @relation("ReviewsReceived", fields: [reviewedId], references: [id], onDelete: Cascade)
+
+  @@map("reviews")
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  senderId   String
+  receiverId String
+  content    String   @db.Text
+  isRead     Boolean  @default(false)
+  readAt     DateTime?
+  createdAt  DateTime @default(now())
+
+  sender   User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String           @db.Text
+  data      Json?            // Dati extra (es: {jobId: "123", propertyId: "456"})
+  isRead    Boolean          @default(false)
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model InventoryItem {
+  id          String   @id @default(cuid())
+  propertyId  String
+  name        String
+  quantity    Int
+  location    String?  // Es: "Kitchen cabinet", "Bathroom closet"
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("inventory_items")
+}
+
+model CalendarSync {
+  id           String             @id @default(cuid())
+  propertyId   String
+  provider     CalendarProvider
+  externalId   String             // ID calendario esterno (Airbnb listing ID, iCal URL, etc.)
+  accessToken  String?            // Token OAuth se necessario
+  refreshToken String?
+  icalUrl      String?
+  status       CalendarSyncStatus @default(ACTIVE)
+  lastSyncAt   DateTime?
+  syncError    String?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("calendar_syncs")
+}

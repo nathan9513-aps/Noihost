@@ -1,0 +1,19 @@
+# Nixpacks Configuration for Railway
+
+[phases.setup]
+nixPkgs = ["nodejs_18", "npm"]
+
+[phases.install]
+cmds = [
+  "npm install --legacy-peer-deps"
+]
+
+[phases.build]
+cmds = [
+  "cd apps/api && npx prisma generate",
+  "npm run build:api",
+  "npm run build:web"
+]
+
+[start]
+cmd = "npm run start:prod"

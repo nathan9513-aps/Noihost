@@ -1,0 +1,23 @@
+# Railway Deployment Configuration
+
+services:
+  # Backend API Service
+  api:
+    name: noihost-api
+    buildCommand: cd apps/api && npm install --legacy-peer-deps && npx prisma generate && npm run build
+    startCommand: cd apps/api && npx prisma migrate deploy && npm run start:prod
+    rootDirectory: /
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+    
+  # Frontend Web Service
+  web:
+    name: noihost-web
+    buildCommand: cd apps/web && npm install --legacy-peer-deps && npm run build
+    startCommand: cd apps/web && npm run start
+    rootDirectory: /
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: ${API_URL}
