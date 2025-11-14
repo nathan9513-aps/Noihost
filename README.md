@@ -9,11 +9,11 @@ This is a clone of [turno.com](https://turno.com) - a comprehensive cleaning man
 ### Tech Stack
 
 - **Frontend**: Next.js 14, TypeScript, Tailwind CSS, shadcn/ui
-- **Backend**: NestJS, Prisma ORM, PostgreSQL
+- **Backend**: NestJS, Prisma ORM, SQLite (dev) / PostgreSQL (prod)
 - **Real-time**: Socket.io
 - **Payments**: Stripe Connect
-- **Cache/Queue**: Redis, Bull
-- **Dev Tools**: Docker, pnpm monorepo
+- **Dev Tools**: npm workspaces (no Docker required!)
+- **Deployment**: Railway (free tier available)
 
 ### Architecture
 
@@ -27,20 +27,17 @@ Monorepo structure with:
 
 ### Prerequisites
 
-- Node.js 18+ 
-- pnpm 8+
-- Docker & Docker Compose
+- Node.js 18+
+- npm 10+ (viene con Node.js)
+- **NO Docker necessario!** ✅
 
-### Installation
+### Local Development (5 minuti)
 
 1. **Clone and install dependencies:**
 
 ```bash
-# Install pnpm if not already installed
-npm install -g pnpm
-
-# Install all dependencies
-pnpm install
+# Install dependencies
+npm install --legacy-peer-deps
 ```
 
 2. **Setup environment variables:**
@@ -48,35 +45,48 @@ pnpm install
 ```bash
 # Backend
 cp apps/api/.env.example apps/api/.env
-# Edit apps/api/.env with your values
-
-# Frontend
-cp apps/web/.env.example apps/web/.env
-# Edit apps/web/.env with your values
+# DATABASE_URL è già configurato per SQLite
 ```
 
-3. **Start Docker services (PostgreSQL, Redis):**
+3. **Setup database (SQLite):**
 
 ```bash
-pnpm docker:up
+cd apps/api
+npx prisma generate
+npx prisma migrate dev --name init
+cd ../..
 ```
 
-4. **Run database migrations:**
-
-```bash
-pnpm db:migrate
-```
-
-5. **Start development servers:**
+4. **Start development servers:**
 
 ```bash
 # Start both frontend and backend
-pnpm dev
+npm run dev
 
 # Or start individually:
-pnpm dev:web    # Frontend on http://localhost:3000
-pnpm dev:api    # Backend on http://localhost:3001
+npm run dev:web    # Frontend on http://localhost:3000
+npm run dev:api    # Backend on http://localhost:3001
+
+# Database UI
+npm run db:studio  # Opens on http://localhost:5555
 ```
+
+### 🚀 Deploy su Railway (GRATIS!)
+
+**Tempo stimato: 20 minuti**
+
+Segui la checklist completa: [`RAILWAY_DEPLOY_CHECKLIST.md`](RAILWAY_DEPLOY_CHECKLIST.md)
+
+**Quick steps:**
+1. Vai su [railway.app](https://railway.app) e login con GitHub
+2. New Project → Deploy from GitHub → Seleziona `Noihost`
+3. Add Database → PostgreSQL
+4. Switch schema locale: `npm run db:switch:postgres`
+5. Push: `git add . && git commit -m "deploy" && git push`
+6. Configura variabili ambiente su Railway
+7. ✅ Live in produzione!
+
+**Dettagli completi:** [`docs/DEPLOY_RAILWAY.md`](docs/DEPLOY_RAILWAY.md)
 
 ## 📁 Project Structure
 
@@ -158,30 +168,31 @@ View full schema: `apps/api/prisma/schema.prisma`
 
 ```bash
 # Install dependencies
-pnpm install
+npm install --legacy-peer-deps
 
 # Development
-pnpm dev              # Start all apps
-pnpm dev:web          # Start frontend only
-pnpm dev:api          # Start backend only
+npm run dev              # Start all apps
+npm run dev:web          # Start frontend only
+npm run dev:api          # Start backend only
 
 # Build
-pnpm build            # Build all apps
-pnpm build:web        # Build frontend
-pnpm build:api        # Build backend
+npm run build            # Build all apps
+npm run build:web        # Build frontend
+npm run build:api        # Build backend
 
 # Database
-pnpm db:migrate       # Run migrations
-pnpm db:seed          # Seed database
-pnpm db:studio        # Open Prisma Studio
+npm run db:migrate       # Run migrations
+npm run db:studio        # Open Prisma Studio
+npm run db:generate      # Generate Prisma Client
 
-# Docker
-pnpm docker:up        # Start PostgreSQL & Redis
-pnpm docker:down      # Stop Docker services
+# Database switching (SQLite <-> PostgreSQL)
+npm run db:switch:sqlite    # Switch to SQLite for local dev
+npm run db:switch:postgres  # Switch to PostgreSQL for Railway
+npm run deploy:prepare      # Prepare for Railway deploy
 
 # Testing
-pnpm test             # Run all tests
-pnpm lint             # Lint all code
+npm test             # Run all tests
+npm run lint         # Lint all code
 ```
 
 ## 🔧 Configuration
@@ -189,19 +200,33 @@ pnpm lint             # Lint all code
 ### Backend (`apps/api/.env`)
 
 ```env
-DATABASE_URL=postgresql://turno:turno_dev_password@localhost:5432/turno_dev
-REDIS_URL=redis://localhost:6379
-JWT_SECRET=your-secret-key
+# Development (SQLite)
+DATABASE_URL="file:./dev.db"
+
+# Production (PostgreSQL - Railway)
+DATABASE_URL="postgresql://user:pass@host:5432/dbname"
+
+# JWT
+JWT_SECRET=your-super-secret-jwt-key
+JWT_EXPIRES_IN=7d
+
+# Stripe (opzionale per ora)
 STRIPE_SECRET_KEY=sk_test_...
-FRONTEND_URL=http://localhost:3000
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_PLATFORM_FEE_PERCENT=10
+
+# Server
 PORT=3001
+NODE_ENV=development
 ```
 
 ### Frontend (`apps/web/.env`)
 
 ```env
+# API URL
 NEXT_PUBLIC_API_URL=http://localhost:3001/api
-NEXT_PUBLIC_SOCKET_URL=http://localhost:3001
+
+# Stripe (quando pronto)
 NEXT_PUBLIC_STRIPE_PUBLIC_KEY=pk_test_...
 ```
 
