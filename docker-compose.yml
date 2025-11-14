@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: turno-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: turno
+      POSTGRES_PASSWORD: turno_dev_password
+      POSTGRES_DB: turno_dev
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - turno-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: turno-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - turno-network
+
+  # Uncomment when ready to run API in Docker
+  # api:
+  #   build:
+  #     context: ./apps/api
+  #     dockerfile: Dockerfile
+  #   container_name: turno-api
+  #   restart: unless-stopped
+  #   environment:
+  #     DATABASE_URL: postgresql://turno:turno_dev_password@postgres:5432/turno_dev
+  #     REDIS_URL: redis://redis:6379
+  #   ports:
+  #     - '3001:3001'
+  #   depends_on:
+  #     - postgres
+  #     - redis
+  #   networks:
+  #     - turno-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  turno-network:
+    driver: bridge

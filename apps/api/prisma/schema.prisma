@@ -1,0 +1,286 @@
+// VERSIONE SQLITE - SQLite non supporta enum nativi
+// Usiamo String con validazione a livello applicazione
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  firstName     String
+  lastName      String
+  phone         String?
+  avatar        String?
+  role          String    // HOST | CLEANER | ADMIN
+  isVerified    Boolean   @default(false)
+  isActive      Boolean   @default(true)
+  
+  stripeCustomerId    String?
+  stripeConnectId     String?
+  
+  ratingAverage       Float?    @default(0)
+  ratingCount         Int       @default(0)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  properties         Property[]
+  cleanerProfile     CleanerProfile?
+  cleaningJobs       CleaningJob[]
+  sentMessages       Message[]         @relation("MessageSender")
+  receivedMessages   Message[]         @relation("MessageReceiver")
+  givenReviews       Review[]          @relation("ReviewGiver")
+  receivedReviews    Review[]          @relation("ReviewReceiver")
+  payments           Payment[]
+  notifications      Notification[]
+}
+
+model CleanerProfile {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  bio               String?
+  experience        Int?
+  serviceRadius     Int?
+  latitude          Float?
+  longitude         Float?
+  address           String?
+  city              String?
+  state             String?
+  country           String
+  zipCode           String?
+  
+  hourlyRate        Float?
+  availability      String?
+  
+  isAvailable       Boolean   @default(true)
+  isVerified        Boolean   @default(false)
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model Property {
+  id                String        @id @default(cuid())
+  ownerId           String
+  owner             User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  
+  name              String
+  type              String        // APARTMENT | HOUSE | CONDO | VILLA | OTHER
+  address           String
+  city              String
+  state             String?
+  country           String
+  zipCode           String?
+  latitude          Float?
+  longitude         Float?
+  
+  bedrooms          Int
+  bathrooms         Int
+  squareMeters      Int?
+  
+  photos            String
+  description       String?
+  
+  cleaningDuration  Int           @default(120)
+  cleaningPrice     Float?
+  checkInTime       String        @default("15:00")
+  checkOutTime      String        @default("11:00")
+  specialNotes      String?
+  
+  isActive          Boolean       @default(true)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  
+  bookings          Booking[]
+  cleaningJobs      CleaningJob[]
+  inventoryItems    InventoryItem[]
+  calendarSyncs     CalendarSync[]
+}
+
+model Booking {
+  id                String          @id @default(cuid())
+  propertyId        String
+  property          Property        @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  guestName         String
+  guestEmail        String?
+  guestPhone        String?
+  
+  checkIn           DateTime
+  checkOut          DateTime
+  numberOfGuests    Int
+  
+  platform          String
+  platformBookingId String?
+  
+  status            String          @default("CONFIRMED") // CONFIRMED | CANCELLED | COMPLETED
+  
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  
+  cleaningJobs      CleaningJob[]
+}
+
+model CleaningJob {
+  id                String              @id @default(cuid())
+  propertyId        String
+  property          Property            @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  bookingId         String?
+  booking           Booking?            @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  
+  cleanerId         String?
+  cleaner           User?               @relation(fields: [cleanerId], references: [id], onDelete: SetNull)
+  
+  scheduledDate     DateTime
+  scheduledTime     String
+  duration          Int
+  
+  price             Float
+  status            String              @default("PENDING") // PENDING | ASSIGNED | ACCEPTED | IN_PROGRESS | COMPLETED | CANCELLED
+  
+  checklistData     String?
+  photos            String
+  notes             String?
+  problemReported   Boolean             @default(false)
+  problemDescription String?
+  problemPhotos     String
+  
+  startedAt         DateTime?
+  completedAt       DateTime?
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  bids              Bid[]
+  payment           Payment?
+}
+
+model Bid {
+  id                String        @id @default(cuid())
+  cleaningJobId     String
+  cleaningJob       CleaningJob   @relation(fields: [cleaningJobId], references: [id], onDelete: Cascade)
+  
+  cleanerId         String
+  price             Float
+  message           String?
+  
+  isAccepted        Boolean       @default(false)
+  isRejected        Boolean       @default(false)
+  
+  createdAt         DateTime      @default(now())
+}
+
+model Payment {
+  id                String          @id @default(cuid())
+  cleaningJobId     String          @unique
+  cleaningJob       CleaningJob     @relation(fields: [cleaningJobId], references: [id], onDelete: Cascade)
+  
+  hostId            String
+  host              User            @relation(fields: [hostId], references: [id])
+  
+  amount            Float
+  currency          String          @default("usd")
+  platformFee       Float
+  cleanerAmount     Float
+  
+  status            String          @default("PENDING") // PENDING | PROCESSING | COMPLETED | FAILED | REFUNDED
+  
+  stripePaymentIntentId String?
+  stripeTransferId      String?
+  
+  paidAt            DateTime?
+  
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+}
+
+model Review {
+  id                String    @id @default(cuid())
+  giverId           String
+  giver             User      @relation("ReviewGiver", fields: [giverId], references: [id], onDelete: Cascade)
+  
+  receiverId        String
+  receiver          User      @relation("ReviewReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  
+  rating            Int
+  comment           String?
+  
+  createdAt         DateTime  @default(now())
+}
+
+model Message {
+  id                String    @id @default(cuid())
+  senderId          String
+  sender            User      @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  
+  receiverId        String
+  receiver          User      @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  
+  content           String
+  attachments       String
+  
+  isRead            Boolean   @default(false)
+  readAt            DateTime?
+  
+  createdAt         DateTime  @default(now())
+}
+
+model Notification {
+  id                String              @id @default(cuid())
+  userId            String
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type              String              // BOOKING_CREATED | CLEANING_ASSIGNED | etc.
+  title             String
+  message           String
+  data              String?
+  
+  isRead            Boolean             @default(false)
+  readAt            DateTime?
+  
+  createdAt         DateTime            @default(now())
+}
+
+model InventoryItem {
+  id                String    @id @default(cuid())
+  propertyId        String
+  property          Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  name              String
+  category          String
+  currentStock      Int
+  minimumStock      Int
+  unit              String
+  
+  needsRestock      Boolean   @default(false)
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model CalendarSync {
+  id                String    @id @default(cuid())
+  propertyId        String
+  property          Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  platform          String
+  calendarUrl       String?
+  accessToken       String?
+  refreshToken      String?
+  
+  lastSyncAt        DateTime?
+  syncEnabled       Boolean   @default(true)
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
