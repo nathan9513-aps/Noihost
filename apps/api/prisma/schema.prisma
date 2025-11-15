@@ -87,7 +87,7 @@ model Property {
   bathrooms         Int
   squareMeters      Int?
   
-  photos            String
+  photos            String?
   description       String?
   
   cleaningDuration  Int           @default(120)
@@ -149,11 +149,11 @@ model CleaningJob {
   status            String              @default("PENDING") // PENDING | ASSIGNED | ACCEPTED | IN_PROGRESS | COMPLETED | CANCELLED
   
   checklistData     String?
-  photos            String
+  photos            String?
   notes             String?
   problemReported   Boolean             @default(false)
   problemDescription String?
-  problemPhotos     String
+  problemPhotos     String?
   
   startedAt         DateTime?
   completedAt       DateTime?

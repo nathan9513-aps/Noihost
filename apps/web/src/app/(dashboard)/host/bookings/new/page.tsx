@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -21,7 +21,6 @@ interface Property {
 
 export default function NewBookingPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [loadingProperties, setLoadingProperties] = useState(true);
   const [error, setError] = useState('');
@@ -43,11 +42,14 @@ export default function NewBookingPage() {
   useEffect(() => {
     fetchProperties();
     // Pre-select property if coming from property detail page
-    const propertyParam = searchParams?.get('property');
-    if (propertyParam) {
-      setFormData((prev) => ({ ...prev, propertyId: propertyParam }));
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const propertyParam = params.get('property');
+      if (propertyParam) {
+        setFormData((prev) => ({ ...prev, propertyId: propertyParam }));
+      }
     }
-  }, [searchParams]);
+  }, []);
 
   const fetchProperties = async () => {
     try {
