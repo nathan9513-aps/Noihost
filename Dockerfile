@@ -57,6 +57,7 @@ WORKDIR /app/apps/web
 RUN ln -sf /app/node_modules ./node_modules
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+ENV NEXT_PUBLIC_API_URL=/api
 RUN npx next build
 
 # Production image with PostgreSQL + Nginx + Backend + Frontend
