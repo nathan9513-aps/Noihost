@@ -1,18 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  
-  // Get role from URL parameter (e.g., /register?role=host)
-  const roleParam = searchParams.get('role');
-  const initialRole = roleParam === 'cleaner' ? 'CLEANER' : 'HOST';
   
   const [formData, setFormData] = useState({
     email: '',
@@ -20,11 +15,22 @@ export default function RegisterPage() {
     firstName: '',
     lastName: '',
     phone: '',
-    role: initialRole,
+    role: 'HOST',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // Get role from URL parameter after mount (e.g., /register?role=host)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const roleParam = params.get('role');
+      if (roleParam === 'cleaner') {
+        setFormData(prev => ({ ...prev, role: 'CLEANER' }));
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
