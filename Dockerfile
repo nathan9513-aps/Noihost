@@ -94,9 +94,10 @@ COPY --from=api-builder /app/apps/api/package*.json ./api/
 # Install production dependencies for Debian (rebuild native modules like bcrypt)
 WORKDIR /app/api
 RUN npm install --production --legacy-peer-deps
+RUN npm install prisma @prisma/client --save-dev --legacy-peer-deps
 
 # Regenerate Prisma Client for Debian
-RUN npx prisma generate --schema=./prisma/schema.prisma
+RUN npx prisma generate
 
 # Copy Frontend Web
 WORKDIR /app
