@@ -33,6 +33,9 @@ COPY apps/web/package*.json ./apps/web/
 # Set working directory
 WORKDIR /app/apps/web
 
+# Link node_modules from parent directory
+RUN ln -sf /app/node_modules ./node_modules
+
 # Set environment variables for build
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
