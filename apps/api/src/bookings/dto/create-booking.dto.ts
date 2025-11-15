@@ -1,105 +1,32 @@
-import { IsString, IsEmail, IsOptional, IsInt, Min, IsDateString } from 'class-validator';import { IsString, IsEmail, IsOptional, IsInt, Min, IsDateString } from 'class-validator';import { IsString, IsNotEmpty, IsDateString, IsInt, IsOptional, Min } from 'class-validator';
-
-
+import { IsString, IsEmail, IsOptional, IsInt, Min, IsDateString } from 'class-validator';
 
 export class CreateBookingDto {
-
   @IsString()
-
-  propertyId: string;export class CreateBookingDto {export class CreateBookingDto {
-
-
-
-  @IsDateString()  @IsString()  @IsString()
-
-  checkIn: string;
-
-  propertyId: string;  @IsNotEmpty()
+  propertyId: string;
 
   @IsDateString()
+  checkIn: string;
 
-  checkOut: string;  propertyId: string;
+  @IsDateString()
+  checkOut: string;
 
-
-
-  @IsString()  @IsDateString()
-
+  @IsString()
   guestName: string;
 
-  checkIn: string; // ISO 8601 date string  @IsString()
-
   @IsEmail()
-
-  @IsOptional()  @IsNotEmpty()
-
+  @IsOptional()
   guestEmail?: string;
 
-  @IsDateString()  guestName: string;
-
   @IsString()
-
-  @IsOptional()  checkOut: string; // ISO 8601 date string
-
+  @IsOptional()
   guestPhone?: string;
 
-  @IsString()
-
   @IsInt()
-
-  @Min(1)  @IsString()  @IsOptional()
-
+  @Min(1)
   numberOfGuests: number;
 
-  guestName: string;  guestEmail?: string;
-
   @IsString()
-
   platform: string;
-
-
-
-  @IsString()  @IsEmail()  @IsString()
-
-  @IsOptional()
-
-  platformBookingId?: string;  @IsOptional()  @IsOptional()
-
-}
-
-  guestEmail?: string;  guestPhone?: string;
-
-
-
-  @IsString()  @IsDateString()
-
-  @IsOptional()  @IsNotEmpty()
-
-  guestPhone?: string;  checkIn: string;
-
-
-
-  @IsInt()  @IsDateString()
-
-  @Min(1)  @IsNotEmpty()
-
-  numberOfGuests: number;  checkOut: string;
-
-
-
-  @IsString()  @IsInt()
-
-  platform: string; // 'Airbnb', 'Vrbo', 'Direct', 'Other'  @Min(1)
-
-  numberOfGuests: number;
-
-  @IsString()
-
-  @IsOptional()  @IsString()
-
-  platformBookingId?: string;  @IsOptional()
-
-}  platform?: string;
-
 
   @IsString()
   @IsOptional()
