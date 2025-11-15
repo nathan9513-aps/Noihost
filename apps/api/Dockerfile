@@ -1,22 +1,28 @@
-FROM node:18-alpine AS builder
+FROM node:18-alpine AS deps
 WORKDIR /app
 
 # Install build tools
 RUN apk add --no-cache python3 make g++
 
-# Copy package files
-COPY package.json package-lock.json* ./
-COPY apps/api/package.json apps/api/
+# Copy all package files first
+COPY package*.json ./
+COPY apps/api/package*.json ./apps/api/
 
-# Install root dependencies
-RUN npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+# Install all dependencies at root level
+RUN npm install --legacy-peer-deps
 
-# Copy all source code
-COPY . .
+FROM node:18-alpine AS builder
+WORKDIR /app
 
-# Install API dependencies and generate Prisma client
+# Copy node_modules from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/package*.json ./
+
+# Copy source code
+COPY apps/api ./apps/api
+
+# Generate Prisma client
 WORKDIR /app/apps/api
-RUN npm ci --no-audit --no-fund || npm install --no-audit --no-fund
 RUN npx prisma generate
 
 # Build the application
@@ -28,16 +34,17 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Copy built artifacts
+# Install wget for healthcheck
+RUN apk add --no-cache wget
+
+# Copy only production files
 COPY --from=builder /app/apps/api/dist ./dist
-COPY --from=builder /app/apps/api/node_modules ./node_modules
 COPY --from=builder /app/apps/api/prisma ./prisma
-COPY --from=builder /app/apps/api/package.json ./package.json
+COPY --from=builder /app/apps/api/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
 
 EXPOSE 3001
 
-# Healthcheck
-RUN apk add --no-cache wget
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
   CMD wget -qO- http://localhost:3001/api/health || exit 1
 
