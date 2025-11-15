@@ -59,13 +59,23 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 RUN npx next build
 
-# Production image with Nginx + Backend + Frontend
+# Production image with PostgreSQL + Nginx + Backend + Frontend
 FROM node:18-alpine AS runner
 
 WORKDIR /app
 
-# Install nginx and supervisor for process management
-RUN apk add --no-cache nginx supervisor wget
+# Install postgresql, nginx and supervisor for process management
+RUN apk add --no-cache \
+    postgresql \
+    postgresql-contrib \
+    nginx \
+    supervisor \
+    wget
+
+# Initialize PostgreSQL data directory
+RUN mkdir -p /var/lib/postgresql/data /run/postgresql && \
+    chown -R postgres:postgres /var/lib/postgresql /run/postgresql && \
+    chmod 750 /var/lib/postgresql/data
 
 # Create necessary directories
 RUN mkdir -p /run/nginx /var/log/supervisor
@@ -126,6 +136,16 @@ user=root
 logfile=/var/log/supervisor/supervisord.log
 pidfile=/var/run/supervisord.pid
 
+[program:postgresql]
+command=/usr/libexec/postgresql-start.sh
+autostart=true
+autorestart=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+priority=1
+
 [program:nginx]
 command=/usr/sbin/nginx -g "daemon off;"
 autostart=true
@@ -134,6 +154,7 @@ stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
+priority=10
 
 [program:api]
 command=node dist/main.js
@@ -144,7 +165,8 @@ stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
-environment=NODE_ENV="production",PORT="3001"
+environment=NODE_ENV="production",PORT="3001",DATABASE_URL="postgresql://postgres:postgres@localhost:5432/noihost"
+priority=20
 
 [program:web]
 command=npx next start
@@ -155,14 +177,61 @@ stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
-environment=NODE_ENV="production",PORT="3000"
+environment=NODE_ENV="production",PORT="3000",NEXT_PUBLIC_API_URL="http://localhost:3001"
+priority=30
 EOF
+
+# PostgreSQL initialization script
+RUN cat > /usr/libexec/postgresql-start.sh <<'EOF'
+#!/bin/sh
+set -e
+
+PGDATA=/var/lib/postgresql/data
+
+# Initialize database if not exists
+if [ ! -f "$PGDATA/PG_VERSION" ]; then
+    echo "Initializing PostgreSQL database..."
+    su-exec postgres initdb -D $PGDATA
+    
+    # Configure PostgreSQL
+    echo "host all all 0.0.0.0/0 md5" >> $PGDATA/pg_hba.conf
+    echo "listen_addresses='*'" >> $PGDATA/postgresql.conf
+    echo "port=5432" >> $PGDATA/postgresql.conf
+    
+    # Start PostgreSQL temporarily to create database
+    su-exec postgres pg_ctl -D $PGDATA -w start
+    
+    # Create database and user
+    su-exec postgres psql -c "CREATE DATABASE noihost;"
+    su-exec postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
+    
+    # Run Prisma migrations if exists
+    if [ -d "/app/api/prisma/migrations" ]; then
+        cd /app/api
+        DATABASE_URL="postgresql://postgres:postgres@localhost:5432/noihost" npx prisma migrate deploy || echo "Migration failed or not needed"
+    fi
+    
+    # Stop PostgreSQL
+    su-exec postgres pg_ctl -D $PGDATA -m fast -w stop
+fi
+
+# Start PostgreSQL
+exec su-exec postgres postgres -D $PGDATA
+EOF
+
+RUN chmod +x /usr/libexec/postgresql-start.sh
+
+# Install su-exec for running postgres as postgres user
+RUN apk add --no-cache su-exec
 
 ENV NODE_ENV=production
 
-EXPOSE 8080
+# Create volume mount point for PostgreSQL data persistence
+VOLUME ["/var/lib/postgresql/data"]
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=30s \
+EXPOSE 8080 5432
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s \
   CMD wget -qO- http://localhost:8080/health || exit 1
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]

@@ -73,20 +73,27 @@ npm run db:studio  # Opens on http://localhost:5555
 
 ## 🚀 Deployment
 
-### Opzione 1: All-in-One (Più Economico - 1 Solo Servizio) 💰
+### Opzione 1: All-in-One (Più Economico - Database Integrato!) 💰
 
-**Immagine Docker unificata con Backend + Frontend + Nginx!**
+**Immagine Docker completa con PostgreSQL + Backend + Frontend + Nginx!**
 
 ```bash
-# Un'unica immagine con tutto
+# Un'unica immagine self-contained con tutto
 ghcr.io/nathan9513-aps/noihost/all-in-one:latest
 ```
 
+**Cosa include:**
+- ✅ PostgreSQL 15 (database integrato)
+- ✅ NestJS Backend (API)
+- ✅ Next.js Frontend (web)
+- ✅ Nginx (reverse proxy)
+
 **Vantaggi:**
-- ✅ **50% più economico** ($5-15/mese invece di $10-20)
+- ✅ **60-70% più economico** ($6-10/mese invece di $15-25)
 - ✅ Un solo servizio da configurare
-- ✅ Nginx integrato come reverse proxy
-- ✅ Perfetto per MVP e demo
+- ✅ Zero setup database esterno
+- ✅ Completamente self-contained
+- ✅ Perfetto per MVP, demo e piccoli progetti
 
 **Guida completa:** [`docs/DEPLOY_ALL_IN_ONE.md`](docs/DEPLOY_ALL_IN_ONE.md)
 
