@@ -71,22 +71,44 @@ npm run dev:api    # Backend on http://localhost:3001
 npm run db:studio  # Opens on http://localhost:5555
 ```
 
-### 🚀 Deploy su Railway (GRATIS!)
+## 🚀 Deployment
+
+### Opzione 1: Northflank (Consigliato - Build Automatizzato)
+
+**Immagini Docker pre-compilate via GitHub Actions!**
+
+```bash
+# Le immagini vengono costruite automaticamente ad ogni push
+# ghcr.io/nathan9513-aps/noihost/api:latest
+# ghcr.io/nathan9513-aps/noihost/web:latest
+```
+
+**Vantaggi:**
+- ✅ Build automatizzati su GitHub (risparmia risorse)
+- ✅ Deploy veloce con immagini pre-compilate
+- ✅ Perfetto per hardware modesto
+- ✅ Free tier disponibile
+
+**Guida completa:** [`docs/DEPLOY_NORTHFLANK.md`](docs/DEPLOY_NORTHFLANK.md)
+
+### Opzione 2: Railway (Alternativa)
 
 **Tempo stimato: 20 minuti**
 
-Segui la checklist completa: [`RAILWAY_DEPLOY_CHECKLIST.md`](RAILWAY_DEPLOY_CHECKLIST.md)
+Segui la checklist: [`RAILWAY_DEPLOY_CHECKLIST.md`](RAILWAY_DEPLOY_CHECKLIST.md)
 
 **Quick steps:**
 1. Vai su [railway.app](https://railway.app) e login con GitHub
 2. New Project → Deploy from GitHub → Seleziona `Noihost`
 3. Add Database → PostgreSQL
-4. Switch schema locale: `npm run db:switch:postgres`
-5. Push: `git add . && git commit -m "deploy" && git push`
-6. Configura variabili ambiente su Railway
-7. ✅ Live in produzione!
+4. Configura variabili ambiente
+5. ✅ Live!
 
-**Dettagli completi:** [`docs/DEPLOY_RAILWAY.md`](docs/DEPLOY_RAILWAY.md)
+**Dettagli:** [`docs/DEPLOY_RAILWAY.md`](docs/DEPLOY_RAILWAY.md)
+
+### Docker Images
+
+Vedi [`DOCKER_IMAGES.md`](DOCKER_IMAGES.md) per info sulle immagini Docker pubblicate automaticamente.
 
 ## 📁 Project Structure
 
