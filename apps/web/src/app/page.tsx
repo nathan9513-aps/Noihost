@@ -4,11 +4,16 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
       <div className="z-10 max-w-5xl w-full items-center justify-center font-mono text-sm">
-        <h1 className="text-4xl font-bold text-center mb-8">
-          🧹 Turno Clone
+        <h1 className="text-5xl font-bold text-center mb-4">
+          <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+            🏠 NoiHost
+          </span>
         </h1>
-        <p className="text-xl text-center mb-12 text-muted-foreground">
-          Cleaning Management Platform for Short-Term Rentals
+        <p className="text-2xl text-center mb-4 font-semibold">
+          Cleaning Management Platform
+        </p>
+        <p className="text-lg text-center mb-12 text-muted-foreground">
+          Connect property hosts with professional cleaners
         </p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">

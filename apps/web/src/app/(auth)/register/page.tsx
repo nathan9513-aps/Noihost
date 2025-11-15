@@ -79,13 +79,21 @@ export default function RegisterPage() {
         <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-8">
           {/* Logo */}
           <div className="text-center mb-8">
-            <div className="inline-block p-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg mb-4 animate-pulse-slow">
-              <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
+            <div className="inline-block relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-3xl blur-2xl opacity-40 animate-pulse-slow"></div>
+              <div className="relative p-5 bg-gradient-to-br from-blue-500 via-purple-600 to-pink-600 rounded-3xl shadow-2xl mb-4 transform hover:scale-110 transition-all duration-300">
+                <svg className="w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+              </div>
             </div>
-            <h1 className="text-3xl font-bold text-white mb-2">Join Noihost</h1>
-            <p className="text-gray-300">Create your account and get started</p>
+            <h1 className="text-4xl font-bold mb-2">
+              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                NoiHost
+              </span>
+            </h1>
+            <p className="text-gray-300 text-lg">Create your account and get started</p>
+            <p className="text-gray-400 text-sm mt-1">Join the future of property management</p>
           </div>
 
           {/* Form */}
@@ -98,31 +106,54 @@ export default function RegisterPage() {
 
             {/* Role Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-200 mb-3">I am a</label>
-              <div className="flex gap-3">
+              <label className="block text-sm font-medium text-gray-200 mb-3">
+                <span className="flex items-center gap-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  I am a
+                </span>
+              </label>
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, role: 'HOST' })}
-                  className={`flex-1 p-4 rounded-xl border-2 transition-all duration-200 ${
+                  className={`relative group p-5 rounded-2xl border-2 transition-all duration-300 ${
                     formData.role === 'HOST'
-                      ? 'bg-blue-500/20 border-blue-400 text-white'
-                      : 'bg-white/5 border-white/10 text-gray-300 hover:border-white/30'
+                      ? 'bg-gradient-to-br from-blue-500/20 to-blue-600/10 border-blue-400 text-white shadow-lg shadow-blue-500/20 scale-105'
+                      : 'bg-white/5 border-white/10 text-gray-300 hover:border-blue-400/50 hover:bg-white/10'
                   }`}
                 >
-                  <div className="text-2xl mb-1">🏠</div>
-                  <div className="font-semibold">Host</div>
+                  {formData.role === 'HOST' && (
+                    <div className="absolute top-2 right-2">
+                      <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
+                  <div className="text-3xl mb-2 transform group-hover:scale-110 transition-transform">🏠</div>
+                  <div className="font-bold text-lg">Host</div>
+                  <div className="text-xs text-gray-400 mt-1">Manage properties</div>
                 </button>
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, role: 'CLEANER' })}
-                  className={`flex-1 p-4 rounded-xl border-2 transition-all duration-200 ${
+                  className={`relative group p-5 rounded-2xl border-2 transition-all duration-300 ${
                     formData.role === 'CLEANER'
-                      ? 'bg-purple-500/20 border-purple-400 text-white'
-                      : 'bg-white/5 border-white/10 text-gray-300 hover:border-white/30'
+                      ? 'bg-gradient-to-br from-purple-500/20 to-purple-600/10 border-purple-400 text-white shadow-lg shadow-purple-500/20 scale-105'
+                      : 'bg-white/5 border-white/10 text-gray-300 hover:border-purple-400/50 hover:bg-white/10'
                   }`}
                 >
-                  <div className="text-2xl mb-1">🧹</div>
-                  <div className="font-semibold">Cleaner</div>
+                  {formData.role === 'CLEANER' && (
+                    <div className="absolute top-2 right-2">
+                      <svg className="w-5 h-5 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
+                  <div className="text-3xl mb-2 transform group-hover:scale-110 transition-transform">🧹</div>
+                  <div className="font-bold text-lg">Cleaner</div>
+                  <div className="text-xs text-gray-400 mt-1">Accept cleaning jobs</div>
                 </button>
               </div>
             </div>

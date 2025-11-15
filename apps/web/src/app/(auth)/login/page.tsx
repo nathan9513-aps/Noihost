@@ -99,7 +99,7 @@ export default function LoginPage() {
             
             <CardTitle className="text-3xl text-center font-bold">
               <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                Turno Clone
+                NoiHost
               </span>
             </CardTitle>
             <CardDescription className="text-center text-base text-gray-300">
