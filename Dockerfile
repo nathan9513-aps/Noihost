@@ -72,7 +72,8 @@ RUN apk add --no-cache \
     supervisor \
     wget \
     openssl \
-    openssl-dev
+    openssl-dev \
+    libc6-compat
 
 # Create symlinks for OpenSSL 1.1 compatibility (Prisma requirement)
 RUN ln -s /usr/lib/libssl.so.3 /usr/lib/libssl.so.1.1 || true && \
@@ -94,7 +95,8 @@ COPY --from=api-builder /app/node_modules ./api/node_modules
 
 # Regenerate Prisma Client for Alpine Linux (must run in target architecture)
 WORKDIR /app/api
-RUN npx prisma generate
+RUN npm install prisma @prisma/client --save-dev --legacy-peer-deps || true
+RUN npx prisma generate --schema=./prisma/schema.prisma
 
 # Copy Frontend Web
 WORKDIR /app
