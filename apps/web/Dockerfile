@@ -23,8 +23,8 @@ WORKDIR /app/apps/web
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
-# Build Next.js app
-RUN npm run build
+# Build Next.js app directly with next CLI
+RUN npx next build
 
 # Production stage
 FROM node:18-alpine AS runner
@@ -41,4 +41,4 @@ COPY --from=builder /app/node_modules ./node_modules
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["npx", "next", "start"]
