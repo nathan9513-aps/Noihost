@@ -1,29 +1,35 @@
-# Dockerfile for Next.js frontend (apps/web)
 FROM node:18-alpine AS builder
 WORKDIR /app
 
-# install root deps
-COPY package.json package-lock.json ./
-RUN npm ci --no-audit --no-fund
+# Copy package files
+COPY package.json package-lock.json* ./
+COPY apps/web/package.json apps/web/
 
-# copy web
-COPY apps/web/package.json apps/web/package.json
-COPY apps/web/package-lock.json apps/web/package-lock.json 2>/dev/null || true
+# Install root dependencies
+RUN npm ci --no-audit --no-fund || npm install --no-audit --no-fund
 
+# Copy all source code
 COPY . .
-WORKDIR /app/apps/web
-RUN npm install --no-audit --no-fund
 
-# build Next app
+# Install web dependencies
+WORKDIR /app/apps/web
+RUN npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+
+# Build Next.js app
 RUN npm run build
 
-FROM node:18-alpine
+# Production stage
+FROM node:18-alpine AS runner
 WORKDIR /app
+
 ENV NODE_ENV=production
-COPY --from=builder /app/apps/web/.next .next
+
+# Copy built artifacts
+COPY --from=builder /app/apps/web/.next ./.next
 COPY --from=builder /app/apps/web/public ./public
 COPY --from=builder /app/apps/web/node_modules ./node_modules
 COPY --from=builder /app/apps/web/package.json ./package.json
 
 EXPOSE 3000
+
 CMD ["npm", "run", "start"]
