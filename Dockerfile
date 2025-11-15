@@ -64,14 +64,19 @@ FROM node:18-alpine AS runner
 
 WORKDIR /app
 
-# Install postgresql, nginx, supervisor and OpenSSL 1.1 for Prisma
+# Install postgresql, nginx, supervisor and OpenSSL for Prisma
 RUN apk add --no-cache \
     postgresql \
     postgresql-contrib \
     nginx \
     supervisor \
     wget \
-    openssl1.1-compat
+    openssl \
+    openssl-dev
+
+# Create symlinks for OpenSSL 1.1 compatibility (Prisma requirement)
+RUN ln -s /usr/lib/libssl.so.3 /usr/lib/libssl.so.1.1 || true && \
+    ln -s /usr/lib/libcrypto.so.3 /usr/lib/libcrypto.so.1.1 || true
 
 # Initialize PostgreSQL data directory
 RUN mkdir -p /var/lib/postgresql/data /run/postgresql && \
