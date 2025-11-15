@@ -76,9 +76,9 @@ model Property {
   name              String
   type              String        // APARTMENT | HOUSE | CONDO | VILLA | OTHER
   address           String
-  city              String
+  city              String?
   state             String?
-  country           String
+  country           String?
   zipCode           String?
   latitude          Float?
   longitude         Float?
@@ -86,9 +86,12 @@ model Property {
   bedrooms          Int
   bathrooms         Int
   squareMeters      Int?
+  squareFeet        Int?
   
   photos            String?
   description       String?
+  notes             String?
+  accessInstructions String?
   
   cleaningDuration  Int           @default(120)
   cleaningPrice     Float?
