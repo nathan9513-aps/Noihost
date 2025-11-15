@@ -136,16 +136,6 @@ user=root
 logfile=/var/log/supervisor/supervisord.log
 pidfile=/var/run/supervisord.pid
 
-[program:postgresql]
-command=/usr/libexec/postgresql-start.sh
-autostart=true
-autorestart=true
-stdout_logfile=/dev/stdout
-stdout_logfile_maxbytes=0
-stderr_logfile=/dev/stderr
-stderr_logfile_maxbytes=0
-priority=1
-
 [program:nginx]
 command=/usr/sbin/nginx -g "daemon off;"
 autostart=true
@@ -165,7 +155,7 @@ stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
-environment=NODE_ENV="production",PORT="3001",DATABASE_URL="postgresql://postgres:postgres@localhost:5432/noihost"
+environment=NODE_ENV="production",PORT="3001",DATABASE_URL="file:./dev.db",JWT_SECRET="noihost-production-secret-2024-change-this"
 priority=20
 
 [program:web]
@@ -181,7 +171,7 @@ environment=NODE_ENV="production",PORT="3000",NEXT_PUBLIC_API_URL="/api"
 priority=30
 EOF
 
-# PostgreSQL initialization script
+# PostgreSQL initialization script (not used with SQLite)
 RUN cat > /usr/libexec/postgresql-start.sh <<'EOF'
 #!/bin/sh
 set -e
@@ -220,6 +210,28 @@ exec su-exec postgres postgres -D $PGDATA
 EOF
 
 RUN chmod +x /usr/libexec/postgresql-start.sh
+
+# Create startup script to initialize SQLite database
+RUN cat > /usr/local/bin/init-db.sh <<'EOF'
+#!/bin/sh
+set -e
+
+cd /app/api
+
+# Check if database exists
+if [ ! -f "./dev.db" ]; then
+    echo "Initializing SQLite database..."
+    DATABASE_URL="file:./dev.db" npx prisma migrate deploy || echo "Migration skipped"
+    echo "Database initialized!"
+else
+    echo "Database already exists, skipping initialization"
+fi
+EOF
+
+RUN chmod +x /usr/local/bin/init-db.sh
+
+# Run database initialization
+RUN cd /app/api && /usr/local/bin/init-db.sh
 
 # Install su-exec for running postgres as postgres user
 RUN apk add --no-cache su-exec

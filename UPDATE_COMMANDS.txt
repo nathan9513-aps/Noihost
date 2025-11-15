@@ -1,0 +1,76 @@
+=========================================
+COMANDI DA ESEGUIRE SUL SERVER REMOTO
+=========================================
+
+Accedi al server con:
+ssh root@136.111.249.191
+
+Oppure se usi Google Cloud Console, apri la shell SSH dalla dashboard.
+
+Una volta dentro, esegui questi comandi:
+
+-------------------------------------------
+1. FERMA IL VECCHIO CONTAINER
+-------------------------------------------
+docker stop noihost-app
+docker rm noihost-app
+
+-------------------------------------------
+2. SCARICA LA NUOVA IMMAGINE
+-------------------------------------------
+docker pull ghcr.io/nathan9513-aps/noihost/all-in-one:latest
+
+-------------------------------------------
+3. AVVIA IL NUOVO CONTAINER
+-------------------------------------------
+docker run -d \
+  --name noihost-app \
+  -p 8080:8080 \
+  ghcr.io/nathan9513-aps/noihost/all-in-one:latest
+
+-------------------------------------------
+4. VERIFICA CHE FUNZIONI
+-------------------------------------------
+# Controlla che il container sia avviato
+docker ps | grep noihost
+
+# Guarda i log (premi Ctrl+C per uscire)
+docker logs -f noihost-app
+
+# Dovresti vedere:
+# - PostgreSQL initialized
+# - API Server running on: http://localhost:3001/api
+# - Ready on http://localhost:3000
+# - Nginx started
+
+-------------------------------------------
+5. TESTA IL SERVIZIO
+-------------------------------------------
+# Test health check
+curl http://localhost:8080/health
+
+# Test API
+curl http://localhost:8080/api
+
+# Poi apri nel browser:
+# http://136.111.249.191:8080
+
+=========================================
+TROUBLESHOOTING
+=========================================
+
+Se ricevi ancora "Failed to fetch":
+1. Apri la Console del Browser (F12)
+2. Vai alla tab "Network"
+3. Prova a registrarti
+4. Vedi quale richiesta fallisce e copia l'errore completo
+
+Se il container non si avvia:
+docker logs noihost-app
+
+Se la porta è già in uso:
+docker ps -a
+docker stop <container-id>
+docker rm <container-id>
+
+=========================================
