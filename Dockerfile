@@ -92,7 +92,12 @@ COPY --from=api-builder /app/apps/api/prisma ./api/prisma
 COPY --from=api-builder /app/apps/api/package*.json ./api/
 COPY --from=api-builder /app/node_modules ./api/node_modules
 
+# Regenerate Prisma Client for Alpine Linux (must run in target architecture)
+WORKDIR /app/api
+RUN npx prisma generate
+
 # Copy Frontend Web
+WORKDIR /app
 COPY --from=web-builder /app/apps/web/.next ./web/.next
 COPY --from=web-builder /app/apps/web/public ./web/public
 COPY --from=web-builder /app/apps/web/package*.json ./web/
