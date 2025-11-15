@@ -73,25 +73,41 @@ npm run db:studio  # Opens on http://localhost:5555
 
 ## 🚀 Deployment
 
-### Opzione 1: Northflank (Consigliato - Build Automatizzato)
+### Opzione 1: All-in-One (Più Economico - 1 Solo Servizio) 💰
+
+**Immagine Docker unificata con Backend + Frontend + Nginx!**
+
+```bash
+# Un'unica immagine con tutto
+ghcr.io/nathan9513-aps/noihost/all-in-one:latest
+```
+
+**Vantaggi:**
+- ✅ **50% più economico** ($5-15/mese invece di $10-20)
+- ✅ Un solo servizio da configurare
+- ✅ Nginx integrato come reverse proxy
+- ✅ Perfetto per MVP e demo
+
+**Guida completa:** [`docs/DEPLOY_ALL_IN_ONE.md`](docs/DEPLOY_ALL_IN_ONE.md)
+
+### Opzione 2: Northflank (Servizi Separati - Più Scalabile)
 
 **Immagini Docker pre-compilate via GitHub Actions!**
 
 ```bash
-# Le immagini vengono costruite automaticamente ad ogni push
-# ghcr.io/nathan9513-aps/noihost/api:latest
-# ghcr.io/nathan9513-aps/noihost/web:latest
+# Backend e Frontend separati
+ghcr.io/nathan9513-aps/noihost/api:latest
+ghcr.io/nathan9513-aps/noihost/web:latest
 ```
 
 **Vantaggi:**
-- ✅ Build automatizzati su GitHub (risparmia risorse)
-- ✅ Deploy veloce con immagini pre-compilate
-- ✅ Perfetto per hardware modesto
-- ✅ Free tier disponibile
+- ✅ Scaling indipendente
+- ✅ High availability
+- ✅ Perfetto per produzione
 
 **Guida completa:** [`docs/DEPLOY_NORTHFLANK.md`](docs/DEPLOY_NORTHFLANK.md)
 
-### Opzione 2: Railway (Alternativa)
+### Opzione 3: Railway (Alternativa)
 
 **Tempo stimato: 20 minuti**
 
