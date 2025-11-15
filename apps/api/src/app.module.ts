@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { CleaningJobsModule } from './cleaning-jobs/cleaning-jobs.module';
+import { PropertiesModule } from './properties/properties.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { CleaningJobsModule } from './cleaning-jobs/cleaning-jobs.module';
     UsersModule,
     BookingsModule,
     CleaningJobsModule,
+    PropertiesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
