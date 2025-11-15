@@ -15,11 +15,15 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/package*.json ./
 
-# Copy source
+# Copy web source files
 COPY apps/web ./apps/web
 
-# Build Next.js
+# Set environment for build
 WORKDIR /app/apps/web
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
+
+# Build Next.js app
 RUN npm run build
 
 # Production stage
@@ -27,11 +31,12 @@ FROM node:18-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Copy built files
+# Copy built application
+COPY --from=builder /app/apps/web/package*.json ./
 COPY --from=builder /app/apps/web/.next ./.next
 COPY --from=builder /app/apps/web/public ./public
-COPY --from=builder /app/apps/web/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 
 EXPOSE 3000
