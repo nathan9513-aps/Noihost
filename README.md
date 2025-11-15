@@ -97,7 +97,19 @@ ghcr.io/nathan9513-aps/noihost/all-in-one:latest
 
 **Guida completa:** [`docs/DEPLOY_ALL_IN_ONE.md`](docs/DEPLOY_ALL_IN_ONE.md)
 
-### Opzione 2: Northflank (Servizi Separati - Più Scalabile)
+### Opzione 2: Google Cloud VM (Massimo Controllo) ☁️
+
+**Deploy su tua VM Ubuntu con Docker!**
+
+**Vantaggi:**
+- ✅ Controllo totale sul server
+- ✅ Flessibilità massima
+- ✅ Free tier disponibile (e2-micro)
+- ✅ Costi competitivi (~$15-25/mese per e2-medium)
+
+**Guida completa:** [`docs/DEPLOY_GOOGLE_CLOUD.md`](docs/DEPLOY_GOOGLE_CLOUD.md)
+
+### Opzione 3: Northflank (Servizi Separati - Più Scalabile)
 
 **Immagini Docker pre-compilate via GitHub Actions!**
 
@@ -114,7 +126,7 @@ ghcr.io/nathan9513-aps/noihost/web:latest
 
 **Guida completa:** [`docs/DEPLOY_NORTHFLANK.md`](docs/DEPLOY_NORTHFLANK.md)
 
-### Opzione 3: Railway (Alternativa)
+### Opzione 4: Railway (Alternativa)
 
 **Tempo stimato: 20 minuti**
 
