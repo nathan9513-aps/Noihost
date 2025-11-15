@@ -64,13 +64,14 @@ FROM node:18-alpine AS runner
 
 WORKDIR /app
 
-# Install postgresql, nginx and supervisor for process management
+# Install postgresql, nginx, supervisor and OpenSSL 1.1 for Prisma
 RUN apk add --no-cache \
     postgresql \
     postgresql-contrib \
     nginx \
     supervisor \
-    wget
+    wget \
+    openssl1.1-compat
 
 # Initialize PostgreSQL data directory
 RUN mkdir -p /var/lib/postgresql/data /run/postgresql && \
