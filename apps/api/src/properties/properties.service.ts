@@ -11,7 +11,11 @@ export class PropertiesService {
     return this.prisma.property.create({
       data: {
         ...createPropertyDto,
-        ownerId: userId,
+        owner: {
+          connect: {
+            id: userId,
+          },
+        },
       },
       include: {
         owner: {
