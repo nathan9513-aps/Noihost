@@ -7,6 +7,8 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { CleaningJobsModule } from './cleaning-jobs/cleaning-jobs.module';
+import { CleaningJobsModule } from './cleaning-jobs/cleaning-jobs.module';
+import { BookingsModule } from './bookings/bookings.module';
 
 @Module({
   imports: [
