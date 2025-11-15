@@ -60,24 +60,20 @@ ENV NODE_ENV=production
 RUN npx next build
 
 # Production image with PostgreSQL + Nginx + Backend + Frontend
-FROM node:18-alpine AS runner
+FROM node:18-bookworm-slim AS runner
 
 WORKDIR /app
 
-# Install postgresql, nginx, supervisor and OpenSSL for Prisma
-RUN apk add --no-cache \
+# Install postgresql, nginx, supervisor and required libraries
+RUN apt-get update && apt-get install -y \
     postgresql \
     postgresql-contrib \
     nginx \
     supervisor \
     wget \
     openssl \
-    openssl-dev \
-    libc6-compat
-
-# Create symlinks for OpenSSL 1.1 compatibility (Prisma requirement)
-RUN ln -s /usr/lib/libssl.so.3 /usr/lib/libssl.so.1.1 || true && \
-    ln -s /usr/lib/libcrypto.so.3 /usr/lib/libcrypto.so.1.1 || true
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 # Initialize PostgreSQL data directory
 RUN mkdir -p /var/lib/postgresql/data /run/postgresql && \
@@ -245,9 +241,6 @@ RUN chmod +x /usr/local/bin/init-db.sh
 
 # Run database initialization
 RUN cd /app/api && /usr/local/bin/init-db.sh
-
-# Install su-exec for running postgres as postgres user
-RUN apk add --no-cache su-exec
 
 ENV NODE_ENV=production
 
