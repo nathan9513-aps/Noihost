@@ -103,7 +103,7 @@ COPY --from=web-builder /app/apps/web/next.config.js ./web/
 COPY --from=web-builder /app/node_modules ./web/node_modules
 
 # Nginx configuration
-RUN cat > /etc/nginx/http.d/default.conf <<'EOF'
+RUN cat > /etc/nginx/sites-available/default <<'EOF'
 server {
     listen 8080;
     server_name _;
