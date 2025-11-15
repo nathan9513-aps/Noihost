@@ -49,32 +49,49 @@ Multi-tenant SaaS with three user roles:
   - docs/HARDWARE_OPTIMIZATION.md - Performance tips
 
 ## Current Status
-🟢 **READY - STARTING FEATURE DEVELOPMENT**
-📅 **Phase**: Week 1 - Authentication & User Management
+🟢 **READY FOR DEPLOYMENT**
+📅 **Phase**: Setup CI/CD & Deployment
+✅ GitHub Actions configurato per build automatizzati
+✅ Docker images pubblicati su GitHub Container Registry
+✅ Guide complete per deploy su Northflank
 
 ## Development Progress
 
-### Week 1: Auth & Users (IN PROGRESS) 🚧
+### ✅ Setup & Infrastructure (COMPLETED)
+- [x] Project scaffold (monorepo)
+- [x] Database schema (18 tables)
+- [x] SQLite dev setup
+- [x] Prisma migrations
+- [x] Git repository su GitHub
+
+### ✅ Backend Core (COMPLETED)
 - [x] Database module with Prisma
 - [x] Auth module (JWT strategy, guards, decorators)
 - [x] User CRUD endpoints structure
-- [ ] Complete auth endpoints (register, login, JWT)
-- [ ] Password hashing (bcrypt)
-- [ ] Login/Register pages (frontend)
-- [ ] Protected routes
-- [ ] User profile management
-📅 **Phase**: Week 1 - Authentication & User Management
+- [x] CORS configuration per produzione
+- [x] Health check endpoint
 
-## Development Progress
+### ✅ Frontend Core (COMPLETED)
+- [x] Next.js 14 app structure
+- [x] Auth pages (login/register)
+- [x] Dashboard layouts (host/cleaner/admin)
+- [x] UI components (button/card/input)
+- [x] Tailwind CSS setup
 
-### Week 1: Auth & Users (IN PROGRESS) 🚧
-- [ ] Auth module (register, login, JWT)
-- [ ] User CRUD endpoints
-- [ ] Password hashing (bcrypt)
-- [ ] Auth guards & decorators
-- [ ] Login/Register pages (frontend)
-- [ ] Protected routes
-- [ ] User profile management
+### ✅ CI/CD & Deployment (COMPLETED)
+- [x] GitHub Actions workflow
+- [x] Docker images per API e Web
+- [x] Auto-publish su GitHub Container Registry
+- [x] Dockerfiles ottimizzati (multi-stage)
+- [x] Documentation complete (DEPLOY_NORTHFLANK.md)
+- [x] Step-by-step checklist (NORTHFLANK_CHECKLIST.md)
+
+### 🚧 Next Steps (PENDING)
+- [ ] Deploy su Northflank
+- [ ] Seed database con dati demo
+- [ ] Complete auth flow end-to-end
+- [ ] Property management features
+- [ ] Booking system
 
 ### Week 2: Properties & Bookings (PLANNED)
 - [ ] Property CRUD endpoints
