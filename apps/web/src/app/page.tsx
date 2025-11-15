@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
@@ -34,12 +36,22 @@ export default function Home() {
         </div>
         
         <div className="flex gap-4 justify-center mt-12">
-          <button className="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition">
-            Sign Up as Host
-          </button>
-          <button className="px-6 py-3 border border-border rounded-lg font-semibold hover:bg-accent transition">
-            Sign Up as Cleaner
-          </button>
+          <Link href="/register?role=host">
+            <button className="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition">
+              Sign Up as Host
+            </button>
+          </Link>
+          <Link href="/register?role=cleaner">
+            <button className="px-6 py-3 border border-border rounded-lg font-semibold hover:bg-accent transition">
+              Sign Up as Cleaner
+            </button>
+          </Link>
+        </div>
+        
+        <div className="flex gap-4 justify-center mt-4">
+          <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground transition">
+            Already have an account? <span className="font-semibold">Sign In</span>
+          </Link>
         </div>
         
         <div className="mt-16 text-center text-sm text-muted-foreground">

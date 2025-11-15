@@ -1,20 +1,26 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Get role from URL parameter (e.g., /register?role=host)
+  const roleParam = searchParams.get('role');
+  const initialRole = roleParam === 'cleaner' ? 'CLEANER' : 'HOST';
+  
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     firstName: '',
     lastName: '',
     phone: '',
-    role: 'HOST',
+    role: initialRole,
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
