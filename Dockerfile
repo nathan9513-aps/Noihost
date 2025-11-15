@@ -177,7 +177,7 @@ stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
-environment=NODE_ENV="production",PORT="3000",NEXT_PUBLIC_API_URL="http://localhost:3001"
+environment=NODE_ENV="production",PORT="3000",NEXT_PUBLIC_API_URL="/api"
 priority=30
 EOF
 
