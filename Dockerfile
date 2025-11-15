@@ -73,6 +73,9 @@ RUN apt-get update && apt-get install -y \
     wget \
     openssl \
     ca-certificates \
+    python3 \
+    make \
+    g++ \
     && rm -rf /var/lib/apt/lists/*
 
 # Initialize PostgreSQL data directory
@@ -87,11 +90,12 @@ RUN mkdir -p /run/nginx /var/log/supervisor
 COPY --from=api-builder /app/apps/api/dist ./api/dist
 COPY --from=api-builder /app/apps/api/prisma ./api/prisma
 COPY --from=api-builder /app/apps/api/package*.json ./api/
-COPY --from=api-builder /app/node_modules ./api/node_modules
 
-# Regenerate Prisma Client for Alpine Linux (must run in target architecture)
+# Install production dependencies for Debian (rebuild native modules like bcrypt)
 WORKDIR /app/api
-RUN npm install prisma @prisma/client --save-dev --legacy-peer-deps || true
+RUN npm install --production --legacy-peer-deps
+
+# Regenerate Prisma Client for Debian
 RUN npx prisma generate --schema=./prisma/schema.prisma
 
 # Copy Frontend Web
@@ -100,7 +104,10 @@ COPY --from=web-builder /app/apps/web/.next ./web/.next
 COPY --from=web-builder /app/apps/web/public ./web/public
 COPY --from=web-builder /app/apps/web/package*.json ./web/
 COPY --from=web-builder /app/apps/web/next.config.js ./web/
-COPY --from=web-builder /app/node_modules ./web/node_modules
+
+# Install production dependencies for Debian
+WORKDIR /app/web
+RUN npm install --production --legacy-peer-deps
 
 # Nginx configuration
 RUN cat > /etc/nginx/sites-available/default <<'EOF'
