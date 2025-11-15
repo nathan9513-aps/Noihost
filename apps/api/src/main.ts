@@ -8,7 +8,12 @@ async function bootstrap() {
   // Enable CORS
   const allowedOrigins = process.env.FRONTEND_URL 
     ? process.env.FRONTEND_URL.split(',')
-    : ['http://localhost:3000'];
+    : [
+        'http://localhost:3000',
+        'http://localhost:8080',
+        'http://136.111.249.191:8080',
+        'http://136.111.249.191:3000',
+      ];
   
   app.enableCors({
     origin: allowedOrigins,
